@@ -1,4 +1,4 @@
-import { BREAK, ConstDirectiveNode, Kind, StringValueNode, visit } from 'graphql';
+import { BREAK, ConstDirectiveNode, DirectiveDefinitionNode, Kind, StringValueNode, visit } from 'graphql';
 import { FieldSetConditionData, RequiredFieldConfiguration } from '../../router-configuration/types';
 import {
   AuthorizationData,
@@ -28,6 +28,7 @@ import { TYPENAME } from '../../utils/string-constants';
 export type FederationFactoryParams = {
   authorizationDataByParentTypeName: Map<TypeName, AuthorizationData>;
   concreteTypeNamesByAbstractTypeName: Map<TypeName, Set<TypeName>>;
+  directiveDefinitionByName?: Map<string, DirectiveDefinitionNode>;
   entityDataByTypeName: Map<TypeName, EntityData>;
   entityInterfaceFederationDataByTypeName: Map<TypeName, EntityInterfaceFederationData>;
   fieldCoordsByNamedTypeName: Map<TypeName, Set<string>>;

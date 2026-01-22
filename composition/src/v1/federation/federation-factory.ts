@@ -295,6 +295,7 @@ export class FederationFactory {
   constructor({
     authorizationDataByParentTypeName,
     concreteTypeNamesByAbstractTypeName,
+    directiveDefinitionByName = new Map<string, DirectiveDefinitionNode>(),
     disableResolvabilityValidation,
     entityDataByTypeName,
     entityInterfaceFederationDataByTypeName,
@@ -305,6 +306,7 @@ export class FederationFactory {
   }: FederationFactoryParams) {
     this.authorizationDataByParentTypeName = authorizationDataByParentTypeName;
     this.concreteTypeNamesByAbstractTypeName = concreteTypeNamesByAbstractTypeName;
+    this.directiveDefinitionByName = directiveDefinitionByName;
     this.disableResolvabilityValidation = disableResolvabilityValidation ?? false;
     this.entityDataByTypeName = entityDataByTypeName;
     this.entityInterfaceFederationDataByTypeName = entityInterfaceFederationDataByTypeName;
@@ -2324,8 +2326,10 @@ export class FederationFactory {
       if (!definition) {
         continue;
       }
-      const dependencies = DEPENDENCIES_BY_DIRECTIVE_NAME.get(directiveName) ?? [];
       this.directiveDefinitionByName.set(directiveName, definition);
+    }
+    for (const [directiveName, definition] of this.directiveDefinitionByName) {
+      const dependencies = DEPENDENCIES_BY_DIRECTIVE_NAME.get(directiveName) ?? [];
       if (CLIENT_PERSISTED_DIRECTIVE_NAMES.has(directiveName)) {
         this.clientDefinitions.push(definition);
         addIterableToSet({
@@ -3351,10 +3355,20 @@ function initializeFederationFactory({
       warnings: result.warnings,
     };
   }
+
+  const directiveDefinitionByName = new Map<DirectiveName, DirectiveDefinitionNode>();
+
+  for (const subgraph of result.internalSubgraphBySubgraphName.values()) {
+    for (const [directiveName, definition] of subgraph.directiveDefinitionByName) {
+      directiveDefinitionByName.set(directiveName, definition);
+    }
+  }
+
   return {
     federationFactory: new FederationFactory({
       authorizationDataByParentTypeName: result.authorizationDataByParentTypeName,
       concreteTypeNamesByAbstractTypeName: result.concreteTypeNamesByAbstractTypeName,
+      directiveDefinitionByName,
       disableResolvabilityValidation,
       entityDataByTypeName: result.entityDataByTypeName,
       entityInterfaceFederationDataByTypeName,
