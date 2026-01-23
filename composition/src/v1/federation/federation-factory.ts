@@ -285,6 +285,7 @@ export class FederationFactory {
     [SEMANTIC_NON_NULL, SEMANTIC_NON_NULL_DEFINITION],
     [TAG, TAG_DEFINITION],
   ]);
+  passthroughDirectivesRepeatability = new Map<string, boolean>();
   potentialPersistedDirectiveDefinitionDataByDirectiveName = new Map<string, PersistedDirectiveDefinitionData>();
   referencedPersistedDirectiveNames = new Set<DirectiveName>();
   routerDefinitions: Array<MutableDefinitionNode | DefinitionNode> = [];
@@ -295,7 +296,7 @@ export class FederationFactory {
   constructor({
     authorizationDataByParentTypeName,
     concreteTypeNamesByAbstractTypeName,
-    directiveDefinitionByName = new Map<string, DirectiveDefinitionNode>(),
+    passThroughDirectiveDefinitionByName = new Map<string, DirectiveDefinitionNode>(),
     disableResolvabilityValidation,
     entityDataByTypeName,
     entityInterfaceFederationDataByTypeName,
@@ -306,7 +307,6 @@ export class FederationFactory {
   }: FederationFactoryParams) {
     this.authorizationDataByParentTypeName = authorizationDataByParentTypeName;
     this.concreteTypeNamesByAbstractTypeName = concreteTypeNamesByAbstractTypeName;
-    this.directiveDefinitionByName = directiveDefinitionByName;
     this.disableResolvabilityValidation = disableResolvabilityValidation ?? false;
     this.entityDataByTypeName = entityDataByTypeName;
     this.entityInterfaceFederationDataByTypeName = entityInterfaceFederationDataByTypeName;
@@ -314,6 +314,12 @@ export class FederationFactory {
     this.internalGraph = internalGraph;
     this.internalSubgraphBySubgraphName = internalSubgraphBySubgraphName;
     this.warnings = warnings;
+
+    for (const [directiveName, directiveDefinition] of passThroughDirectiveDefinitionByName) {
+      this.directiveDefinitionByName.set(directiveName, directiveDefinition);
+      this.persistedDirectiveDefinitionByDirectiveName.set(directiveName, directiveDefinition);
+      this.passthroughDirectivesRepeatability.set(directiveName, directiveDefinition.repeatable);
+    }
   }
 
   extractPersistedDirectives({ data, directivesByName }: ExtractPersistedDirectivesParams): PersistedDirectivesData {
@@ -344,7 +350,10 @@ export class FederationFactory {
             break;
           }
           // Only add one instance of certain directives.
-          if (NON_REPEATABLE_PERSISTED_DIRECTIVES.has(directiveName)) {
+          if (
+            NON_REPEATABLE_PERSISTED_DIRECTIVES.has(directiveName) ||
+            !this.passthroughDirectivesRepeatability.get(directiveName)
+          ) {
             break;
           }
           existingDirectives.push(...directiveNodes);
@@ -3371,7 +3380,7 @@ function initializeFederationFactory({
     federationFactory: new FederationFactory({
       authorizationDataByParentTypeName: result.authorizationDataByParentTypeName,
       concreteTypeNamesByAbstractTypeName: result.concreteTypeNamesByAbstractTypeName,
-      directiveDefinitionByName,
+      passThroughDirectiveDefinitionByName: directiveDefinitionByName,
       disableResolvabilityValidation,
       entityDataByTypeName: result.entityDataByTypeName,
       entityInterfaceFederationDataByTypeName,
