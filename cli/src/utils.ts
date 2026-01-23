@@ -179,9 +179,18 @@ export const introspectSubgraph = async ({
 /**
  * Composes a list of subgraphs into a single schema.
  */
-export function composeSubgraphs(subgraphs: Subgraph[], disableResolvabilityValidation?: boolean): FederationResult {
+export function composeSubgraphs(
+  subgraphs: Subgraph[],
+  disableResolvabilityValidation?: boolean,
+  passthroughSubgraphDirectives?: string[],
+): FederationResult {
   // @TODO get router compatibility version programmatically
-  return federateSubgraphs({ disableResolvabilityValidation, subgraphs, version: ROUTER_COMPATIBILITY_VERSION_ONE });
+  return federateSubgraphs({
+    disableResolvabilityValidation,
+    subgraphs,
+    version: ROUTER_COMPATIBILITY_VERSION_ONE,
+    passthroughSubgraphDirectives,
+  });
 }
 
 export type ConfigData = Partial<KeycloakToken & { organizationSlug: string; lastUpdateCheck: number }>;

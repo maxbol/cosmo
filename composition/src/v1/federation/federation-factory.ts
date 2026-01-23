@@ -3246,6 +3246,7 @@ type FederationFactoryResult = FederationFactoryResultFailure | FederationFactor
 
 function initializeFederationFactory({
   disableResolvabilityValidation,
+  passthroughSubgraphDirectives = [],
   subgraphs,
 }: FederationParams): FederationFactoryResult {
   if (subgraphs.length < 1) {
@@ -3360,7 +3361,9 @@ function initializeFederationFactory({
 
   for (const subgraph of result.internalSubgraphBySubgraphName.values()) {
     for (const [directiveName, definition] of subgraph.directiveDefinitionByName) {
-      directiveDefinitionByName.set(directiveName, definition);
+      if (passthroughSubgraphDirectives.includes(directiveName)) {
+        directiveDefinitionByName.set(directiveName, definition);
+      }
     }
   }
 
@@ -3382,8 +3385,16 @@ function initializeFederationFactory({
   };
 }
 
-export function federateSubgraphs({ disableResolvabilityValidation, subgraphs }: FederationParams): FederationResult {
-  const federationFactoryResult = initializeFederationFactory({ subgraphs, disableResolvabilityValidation });
+export function federateSubgraphs({
+  disableResolvabilityValidation,
+  subgraphs,
+  passthroughSubgraphDirectives,
+}: FederationParams): FederationResult {
+  const federationFactoryResult = initializeFederationFactory({
+    subgraphs,
+    disableResolvabilityValidation,
+    passthroughSubgraphDirectives,
+  });
   if (!federationFactoryResult.success) {
     return { errors: federationFactoryResult.errors, success: false, warnings: federationFactoryResult.warnings };
   }

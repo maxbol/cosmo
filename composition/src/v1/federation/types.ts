@@ -5,6 +5,7 @@ import { ContractName } from '../../types/types';
 export type FederationParams = {
   subgraphs: Array<Subgraph>;
   disableResolvabilityValidation?: boolean;
+  passthroughSubgraphDirectives?: string[];
 };
 
 export type FederateSubgraphsWithContractsV1Params = {

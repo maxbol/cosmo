@@ -105,6 +105,7 @@ type Config = {
     name: string;
     feature_graphs: (StandardSubgraphConfig & { subgraph_name: string })[];
   }[];
+  passthrough_subgraph_directives?: string[];
   subgraphs: ConfigSubgraph[];
 };
 
@@ -208,6 +209,7 @@ export default (opts: BaseCommandOptions) => {
         };
       }),
       options.disableResolvabilityValidation,
+      config.passthrough_subgraph_directives,
     );
 
     if (!result.success) {

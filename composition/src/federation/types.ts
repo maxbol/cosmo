@@ -71,6 +71,7 @@ export type MutualParentDefinitionData = {
 export type FederateSubgraphsParams = {
   subgraphs: Array<Subgraph>;
   disableResolvabilityValidation?: boolean;
+  passthroughSubgraphDirectives?: string[];
   version?: SupportedRouterCompatibilityVersion;
 };
 

@@ -15,11 +15,12 @@ import { ROUTER_COMPATIBILITY_VERSION_ONE } from '../router-compatibility-versio
 export function federateSubgraphs({
   disableResolvabilityValidation,
   subgraphs,
+  passthroughSubgraphDirectives,
   version = ROUTER_COMPATIBILITY_VERSION_ONE,
 }: FederateSubgraphsParams): FederationResult {
   switch (version) {
     default: {
-      return federateSubgraphsV1({ disableResolvabilityValidation, subgraphs });
+      return federateSubgraphsV1({ disableResolvabilityValidation, passthroughSubgraphDirectives, subgraphs });
     }
   }
 }
